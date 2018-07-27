@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+import psycopg2
+import paramiko
+import time
+
+#ログファイル名
+LOG_FILE='log.txt'
+R_HOST='10.40.137.61'
+R_HOST_USER='root'
+R_HOST_PASS='Defaultp@ss1'
+
+logger = paramiko.util.logging.getLogger()
+paramiko.util.log_to_file(LOG_FILE)
+
+
+#ssh = paramiko.SSHClient()
+#ssh.load_system_host_keys()
+#ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#ssh.connect(R_HOST, port=22, username=R_HOST_USER, password=R_HOST_PASS,timeout=15.0,look_for_keys=False)
+
+t = paramiko.Transport(('10.40.137.61', 22))
+t.connect(username=R_HOST_USER, password=R_HOST_PASS)
+c = t.open_session()
+
+stdin,stdout,stderr = c.exec_command('su - postgres')
+time.sleep(3)
+
+conn = psycopg2.connect(dbname= database="imdb2plus")
+curs = conn.cursor()
+sql = "select * from tbl_m_vm"
+curs.execute(sql)
+rows = curs.fetchall()
+print(rows)
+
+
+##root@kjpocpv01006# python postgres_connect.py
+##Traceback (most recent call last):
+##  File "postgres_connect.py", line 28, in <module>
+##    conn = psycopg2.connect("dbname=imdb2plus  host=localhost user=postgres")
+##psycopg2.OperationalError: could not connect to server: Connection refused
+##        Is the server running on host "localhost" and accepting
+##        TCP/IP connections on port 5432?
+##could not create socket: Address family not supported by protocol
+##
+##root@kjpocpv01006#
